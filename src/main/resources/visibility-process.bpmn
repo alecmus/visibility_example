@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0rt0jcl" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.16.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.3.0">
+  <bpmn:process id="Process_VisibilityProcess" name="Visibility Process" isExecutable="true">
+    <bpmn:sequenceFlow id="Flow_1xvvuz0" sourceRef="StartEvent_ProcessStarted" targetRef="Gateway_WaitForMessage" />
+    <bpmn:eventBasedGateway id="Gateway_WaitForMessage" name="Wait for message">
+      <bpmn:incoming>Flow_1xvvuz0</bpmn:incoming>
+      <bpmn:outgoing>Flow_02ieyqb</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1k1ifib</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="Event_FileReceived" name="File received">
+      <bpmn:incoming>Flow_02ieyqb</bpmn:incoming>
+      <bpmn:outgoing>Flow_16psfm5</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1srwnpw" messageRef="Message_2a4rvvq" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_02ieyqb" sourceRef="Gateway_WaitForMessage" targetRef="Event_FileReceived" />
+    <bpmn:startEvent id="StartEvent_ProcessStarted" name="Process started">
+      <bpmn:outgoing>Flow_1xvvuz0</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_ProcessEndedNormally" name="Process ended normally">
+      <bpmn:incoming>Flow_07tx6py</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:intermediateCatchEvent id="Event_StopProcess" name="Stop process">
+      <bpmn:incoming>Flow_1k1ifib</bpmn:incoming>
+      <bpmn:outgoing>Flow_1jifbpy</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1dbar2r" messageRef="Message_0p99hp8" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_1k1ifib" sourceRef="Gateway_WaitForMessage" targetRef="Event_StopProcess" />
+    <bpmn:endEvent id="EndEvent_ProcessEnded" name="Process ended">
+      <bpmn:incoming>Flow_1jifbpy</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1jifbpy" sourceRef="Event_StopProcess" targetRef="EndEvent_ProcessEnded" />
+    <bpmn:sequenceFlow id="Flow_16psfm5" sourceRef="Event_FileReceived" targetRef="Gateway_ProcessFile" />
+    <bpmn:eventBasedGateway id="Gateway_ProcessFile" name="Process file">
+      <bpmn:incoming>Flow_16psfm5</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ucsqzm</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0m0yzwj</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="Event_ErrorProcessingFile" name="Error processing file">
+      <bpmn:incoming>Flow_0ucsqzm</bpmn:incoming>
+      <bpmn:outgoing>Flow_0eoqfrw</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1pve5cp" messageRef="Message_3s0aggf" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_0ucsqzm" sourceRef="Gateway_ProcessFile" targetRef="Event_ErrorProcessingFile" />
+    <bpmn:endEvent id="EndEvent_ProcessEndedAbnormally" name="Process ended abnormally">
+      <bpmn:incoming>Flow_0eoqfrw</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0eoqfrw" sourceRef="Event_ErrorProcessingFile" targetRef="EndEvent_ProcessEndedAbnormally" />
+    <bpmn:intermediateCatchEvent id="Event_FileProcessed" name="File processed">
+      <bpmn:incoming>Flow_0m0yzwj</bpmn:incoming>
+      <bpmn:outgoing>Flow_07tx6py</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1pilreh" messageRef="Message_1rlpo2e" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_0m0yzwj" sourceRef="Gateway_ProcessFile" targetRef="Event_FileProcessed" />
+    <bpmn:sequenceFlow id="Flow_07tx6py" sourceRef="Event_FileProcessed" targetRef="EndEvent_ProcessEndedNormally" />
+  </bpmn:process>
+  <bpmn:message id="Message_2a4rvvq" name="Message_FileReceived">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=instanceUUID" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_1rlpo2e" name="Message_FileProcessed">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=instanceUUID" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_0p99hp8" name="Message_StopProcess">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=instanceUUID" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:error id="Error_0yz83g8" name="Error_FileProcessingError" errorCode="FileProcessingError" />
+  <bpmn:message id="Message_3s0aggf" name="Message_ErrorProcessingFile">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=instanceUUID" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_VisibilityProcess">
+      <bpmndi:BPMNShape id="Gateway_0yonmvj_di" bpmnElement="Gateway_WaitForMessage">
+        <dc:Bounds x="265" y="95" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="247" y="71" width="86" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_155zs2l_di" bpmnElement="Event_FileReceived">
+        <dc:Bounds x="362" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="349" y="145" width="63" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1mbb2h0_di" bpmnElement="StartEvent_ProcessStarted">
+        <dc:Bounds x="172" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="153" y="145" width="77" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1jybldk_di" bpmnElement="EndEvent_ProcessEndedNormally">
+        <dc:Bounds x="722" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="703" y="145" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0uwxfvv_di" bpmnElement="Event_StopProcess">
+        <dc:Bounds x="362" y="322" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="348" y="365" width="65" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_09c8iew_di" bpmnElement="EndEvent_ProcessEnded">
+        <dc:Bounds x="722" y="322" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="703" y="365" width="74" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0h3y1ky_di" bpmnElement="Gateway_ProcessFile">
+        <dc:Bounds x="445" y="95" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="441" y="71" width="58" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1lk4h93_di" bpmnElement="Event_ErrorProcessingFile">
+        <dc:Bounds x="582" y="212" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="562" y="255" width="81" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0xisunu_di" bpmnElement="EndEvent_ProcessEndedAbnormally">
+        <dc:Bounds x="722" y="212" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="704" y="255" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0eez139_di" bpmnElement="Event_FileProcessed">
+        <dc:Bounds x="582" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="566" y="145" width="72" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1xvvuz0_di" bpmnElement="Flow_1xvvuz0">
+        <di:waypoint x="208" y="120" />
+        <di:waypoint x="265" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02ieyqb_di" bpmnElement="Flow_02ieyqb">
+        <di:waypoint x="315" y="120" />
+        <di:waypoint x="362" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1k1ifib_di" bpmnElement="Flow_1k1ifib">
+        <di:waypoint x="290" y="145" />
+        <di:waypoint x="290" y="340" />
+        <di:waypoint x="362" y="340" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1jifbpy_di" bpmnElement="Flow_1jifbpy">
+        <di:waypoint x="398" y="340" />
+        <di:waypoint x="722" y="340" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16psfm5_di" bpmnElement="Flow_16psfm5">
+        <di:waypoint x="398" y="120" />
+        <di:waypoint x="445" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ucsqzm_di" bpmnElement="Flow_0ucsqzm">
+        <di:waypoint x="470" y="145" />
+        <di:waypoint x="470" y="230" />
+        <di:waypoint x="582" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0eoqfrw_di" bpmnElement="Flow_0eoqfrw">
+        <di:waypoint x="618" y="230" />
+        <di:waypoint x="722" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0m0yzwj_di" bpmnElement="Flow_0m0yzwj">
+        <di:waypoint x="495" y="120" />
+        <di:waypoint x="582" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_07tx6py_di" bpmnElement="Flow_07tx6py">
+        <di:waypoint x="618" y="120" />
+        <di:waypoint x="722" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

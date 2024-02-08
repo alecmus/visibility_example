@@ -6,6 +6,7 @@ import io.camunda.zeebe.client.impl.oauth.OAuthCredentialsProviderBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,5 +60,24 @@ public class ZeebeConfiguration {
 
         log.info("Zeebe client bean created successfully");
         return client;
+    }
+
+    // This will be executed after the ApplicationContext has been
+    // created but just before the Spring Boot application starts up
+    @Bean
+    public ApplicationRunner processDeployment(ZeebeClient client) {
+        return applicationArguments -> {
+
+            final String processFile = "visibility-process.bpmn";
+
+            log.info("Deploying process from file " + processFile);
+
+            client.newDeployResourceCommand()
+                    .addResourceFromClasspath(processFile)
+                    .send()
+                    .join();
+
+            log.info("Process deployed from file " + processFile);
+        };
     }
 }
