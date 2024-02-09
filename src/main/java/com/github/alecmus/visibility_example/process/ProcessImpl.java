@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
@@ -59,6 +60,7 @@ public class ProcessImpl implements Process {
             zeebeClient.newPublishMessageCommand()
                     .messageName(messageName)
                     .correlationKey(correlationKey)
+                    .timeToLive(Duration.ofSeconds(1))
                     .send().join();
 
             log.debug("Message '" + messageName + "' sent");
