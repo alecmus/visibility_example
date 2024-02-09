@@ -1,6 +1,6 @@
 package com.github.alecmus.visibility_example.file;
 
-import io.camunda.zeebe.client.ZeebeClient;
+import com.github.alecmus.visibility_example.process.Process;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.util.Map;
 
 /*
@@ -23,12 +22,12 @@ public class FileRouter extends RouteBuilder {
     private static final String DESTINATION_FOLDER = "C:/software/test/destination-folder";
 
     private final FileProcessor fileProcessor;
-    private final ZeebeClient zeebeClient;
+    private final Process process;
 
     @Autowired
-    public FileRouter(FileProcessor fileProcessor, ZeebeClient zeebeClient) {
+    public FileRouter(FileProcessor fileProcessor, Process process) {
         this.fileProcessor = fileProcessor;
-        this.zeebeClient = zeebeClient;
+        this.process = process;
     }
 
     /*
@@ -47,46 +46,27 @@ public class FileRouter extends RouteBuilder {
                 .endDoTry()
                     .process(exchange -> {
                         final String fileName = exchange.getIn().getHeader(Exchange.FILE_NAME, String.class);
-                        final String instanceUUID = exchange.getIn().getHeader("instanceUUID", String.class);
+                        final String correlationKey = exchange.getIn().getHeader("correlationKey", String.class);
 
-                        try {
-                            // send file processed message to process
-                            zeebeClient.newPublishMessageCommand()
-                                    .messageName("Message_FileProcessed")
-                                    .correlationKey(instanceUUID)
-                                    .timeToLive(Duration.ofSeconds(1))
-                                    .send().join();
-                        } catch (Exception e) {
-                            log.debug("Failed to send Message_FileProcessed: " + e.getMessage());
-                        }
+                        // send file processed message
+                        process.sendMessage("Message_FileProcessed", correlationKey);
 
                         log.info("Done processing: " + fileName);
                     })
                 .doCatch(Exception.class)
                     .process(exchange -> {
-                        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+                        Exception exception = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+                        final String correlationKey = exchange.getIn().getHeader("correlationKey", String.class);
+                        final Long instanceKey = exchange.getIn().getHeader("instanceKey", Long.class);
 
-                        try {
-                            final String instanceUUID = exchange.getIn().getHeader("instanceUUID", String.class);
-                            final Long instanceKey = exchange.getIn().getHeader("instanceKey", Long.class);
+                        // add exception and cause as process variables
+                        process.addVariables(instanceKey, Map.of("exception", exception.toString()));
+                        process.addVariables(instanceKey, Map.of("cause", exception.getCause().toString()));
 
-                            // add cause as a process variable
-                            zeebeClient.newSetVariablesCommand(instanceKey)
-                                    .variables(Map.of("cause", cause.toString()))
-                                    .send().join();
+                        // send error processing file message
+                        process.sendMessage("Message_ErrorProcessingFile", correlationKey);
 
-                            // send error processing file message to process
-                            zeebeClient.newPublishMessageCommand()
-                                    .messageName("Message_ErrorProcessingFile")
-                                    .correlationKey(instanceUUID)
-                                    .timeToLive(Duration.ofSeconds(1))
-                                    .send().join();
-                        } catch (Exception e) {
-                            log.debug("Failed to send Message_ErrorProcessingFile: " + e.getMessage());
-                        }
-
-                        if (cause != null)
-                            log.error("Exception occured: ", cause);
+                        log.error("Exception occured: ", exception);
                     })
                 .end();
     }
