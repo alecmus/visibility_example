@@ -46,25 +46,23 @@ public class FileRouter extends RouteBuilder {
                 .endDoTry()
                     .process(exchange -> {
                         final String fileName = exchange.getIn().getHeader(Exchange.FILE_NAME, String.class);
-                        final String correlationKey = exchange.getIn().getHeader("correlationKey", String.class);
 
-                        // send file processed message
-                        camundaProcess.sendMessage("Message_FileProcessed", correlationKey);
+                        // complete process file service task
+                        camundaProcess.completeServiceTask("Task_ProcessFile");
 
                         log.info("Done processing: " + fileName);
                     })
                 .doCatch(Exception.class)
                     .process(exchange -> {
                         Exception exception = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-                        final String correlationKey = exchange.getIn().getHeader("correlationKey", String.class);
                         final Long instanceKey = exchange.getIn().getHeader("instanceKey", Long.class);
 
                         // add exception and cause as process variables
                         camundaProcess.addVariables(instanceKey, Map.of("exception", exception.toString()));
                         camundaProcess.addVariables(instanceKey, Map.of("cause", exception.getCause().toString()));
 
-                        // send error processing file message
-                        camundaProcess.sendMessage("Message_ErrorProcessingFile", correlationKey);
+                        // fail service task
+                        camundaProcess.failServiceTask("Task_ProcessFile", "FileProcessingError");
 
                         log.error("Exception occured: ", exception);
                     })
