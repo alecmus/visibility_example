@@ -2,7 +2,7 @@ package com.github.alecmus.visibility_example.process;
 
 import java.util.Map;
 
-public interface Process {
+public interface CamundaProcess {
 
     static class Properties {
         private Long instanceKey;

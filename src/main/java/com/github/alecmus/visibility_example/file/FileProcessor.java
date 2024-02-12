@@ -1,6 +1,6 @@
 package com.github.alecmus.visibility_example.file;
 
-import com.github.alecmus.visibility_example.process.Process;
+import com.github.alecmus.visibility_example.process.CamundaProcess;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
@@ -21,24 +21,24 @@ public class FileProcessor implements Processor {
 
     private static final Logger log = LoggerFactory.getLogger(FileProcessor.class);
 
-    private final Process process;
+    private final CamundaProcess camundaProcess;
 
     @Autowired
-    public FileProcessor(Process process) {
-        this.process = process;
+    public FileProcessor(CamundaProcess process) {
+        this.camundaProcess = process;
     }
 
     @Override
     public void process(Exchange exchange) {
         // start process instance
-        Process.Properties properties = process.startProcess("Process_VisibilityProcess");
+        CamundaProcess.Properties properties = camundaProcess.startProcess("Process_VisibilityProcess");
 
         // add correlationKey and instanceKey as exchange headers
         exchange.getIn().setHeader("correlationKey", properties.getCorrelationKey());
         exchange.getIn().setHeader("instanceKey", properties.getInstanceKey());
 
         // send file received message
-        process.sendMessage("Message_FileReceived", properties.getCorrelationKey());
+        camundaProcess.sendMessage("Message_FileReceived", properties.getCorrelationKey());
 
         // get the original file name by reading the header using getHeader()
         String originalFileName = exchange.getIn().getHeader(Exchange.FILE_NAME, String.class);

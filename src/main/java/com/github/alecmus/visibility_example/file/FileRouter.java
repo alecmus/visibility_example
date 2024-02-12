@@ -1,6 +1,6 @@
 package com.github.alecmus.visibility_example.file;
 
-import com.github.alecmus.visibility_example.process.Process;
+import com.github.alecmus.visibility_example.process.CamundaProcess;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
@@ -22,12 +22,12 @@ public class FileRouter extends RouteBuilder {
     private static final String DESTINATION_FOLDER = "C:/software/test/destination-folder";
 
     private final FileProcessor fileProcessor;
-    private final Process process;
+    private final CamundaProcess camundaProcess;
 
     @Autowired
-    public FileRouter(FileProcessor fileProcessor, Process process) {
+    public FileRouter(FileProcessor fileProcessor, CamundaProcess process) {
         this.fileProcessor = fileProcessor;
-        this.process = process;
+        this.camundaProcess = process;
     }
 
     /*
@@ -49,7 +49,7 @@ public class FileRouter extends RouteBuilder {
                         final String correlationKey = exchange.getIn().getHeader("correlationKey", String.class);
 
                         // send file processed message
-                        process.sendMessage("Message_FileProcessed", correlationKey);
+                        camundaProcess.sendMessage("Message_FileProcessed", correlationKey);
 
                         log.info("Done processing: " + fileName);
                     })
@@ -60,11 +60,11 @@ public class FileRouter extends RouteBuilder {
                         final Long instanceKey = exchange.getIn().getHeader("instanceKey", Long.class);
 
                         // add exception and cause as process variables
-                        process.addVariables(instanceKey, Map.of("exception", exception.toString()));
-                        process.addVariables(instanceKey, Map.of("cause", exception.getCause().toString()));
+                        camundaProcess.addVariables(instanceKey, Map.of("exception", exception.toString()));
+                        camundaProcess.addVariables(instanceKey, Map.of("cause", exception.getCause().toString()));
 
                         // send error processing file message
-                        process.sendMessage("Message_ErrorProcessingFile", correlationKey);
+                        camundaProcess.sendMessage("Message_ErrorProcessingFile", correlationKey);
 
                         log.error("Exception occured: ", exception);
                     })

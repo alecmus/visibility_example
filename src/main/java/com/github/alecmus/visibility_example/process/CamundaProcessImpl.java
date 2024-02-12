@@ -11,13 +11,13 @@ import java.util.Map;
 import java.util.UUID;
 
 @Component
-public class ProcessImpl implements Process {
+public class CamundaProcessImpl implements CamundaProcess {
 
-    private final Logger log = LoggerFactory.getLogger(ProcessImpl.class);
+    private final Logger log = LoggerFactory.getLogger(CamundaProcessImpl.class);
     private final ZeebeClient zeebeClient;
 
     @Autowired
-    public ProcessImpl(ZeebeClient zeebeClient) {
+    public CamundaProcessImpl(ZeebeClient zeebeClient) {
         this.zeebeClient = zeebeClient;
     }
 
