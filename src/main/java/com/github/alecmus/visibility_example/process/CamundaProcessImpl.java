@@ -86,6 +86,11 @@ public class CamundaProcessImpl implements CamundaProcess {
 
     @Override
     public void completeServiceTask(String jobType) {
+        completeServiceTask(jobType, Map.of(), false);
+    }
+
+    @Override
+    public void completeServiceTask(String jobType, Map<String, Object> variables, boolean processVariables) {
         try {
             log.debug("Completing job '" + jobType + "'");
 
@@ -100,8 +105,12 @@ public class CamundaProcessImpl implements CamundaProcess {
                 throw new IllegalStateException("Job not found");
 
             for (ActivatedJob job : activatedJobs) {
+                if (processVariables)
+                    addVariables(job.getProcessInstanceKey(), variables);
+
                 // complete the job
                 zeebeClient.newCompleteCommand(job)
+                        .variables(processVariables ? Map.of() : variables)
                         .send().join();
             }
         } catch (Exception e) {
@@ -110,6 +119,11 @@ public class CamundaProcessImpl implements CamundaProcess {
     }
 
     public void failServiceTask(String jobType, String errorCode) {
+        failServiceTask(jobType, errorCode, Map.of(), false);
+    }
+
+    @Override
+    public void failServiceTask(String jobType, String errorCode, Map<String, Object> variables, boolean processVariables) {
         try {
             log.debug("Failing job '" + jobType + "'");
 
@@ -124,10 +138,14 @@ public class CamundaProcessImpl implements CamundaProcess {
                 throw new IllegalStateException("Job not found");
 
             for (ActivatedJob job : activatedJobs) {
+                if (processVariables)
+                    addVariables(job.getProcessInstanceKey(), variables);
+
                 // fail the job. This will be handled by an error catch event
                 // identified by the given errorCode.
                 zeebeClient.newThrowErrorCommand(job.getKey())
                         .errorCode(errorCode)
+                        .variables(processVariables ? Map.of() : variables)
                         .send().join();
             }
         } catch (Exception e) {
