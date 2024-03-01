@@ -33,9 +33,8 @@ public class FileProcessor implements Processor {
         // start process instance
         CamundaProcess.Properties properties = camundaProcess.startProcess("Process_VisibilityProcess");
 
-        // add correlationKey and instanceKey as exchange headers
+        // add correlationKey as exchange header
         exchange.getIn().setHeader("correlationKey", properties.getCorrelationKey());
-        exchange.getIn().setHeader("instanceKey", properties.getInstanceKey());
 
         // send file received message
         camundaProcess.sendMessage("Message_FileReceived", properties.getCorrelationKey());

@@ -55,14 +55,15 @@ public class FileRouter extends RouteBuilder {
                 .doCatch(Exception.class)
                     .process(exchange -> {
                         Exception exception = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-                        final Long instanceKey = exchange.getIn().getHeader("instanceKey", Long.class);
 
                         // add exception and cause as process variables
-                        camundaProcess.addVariables(instanceKey, Map.of("exception", exception.toString()));
-                        camundaProcess.addVariables(instanceKey, Map.of("cause", exception.getCause().toString()));
+                        Map<String, Object> variables = Map.ofEntries(
+                          Map.entry("exception", exception.toString()),
+                          Map.entry("cause", exception.getCause().toString())
+                        );
 
                         // fail service task
-                        camundaProcess.failServiceTask("Task_ProcessFile", "FileProcessingError");
+                        camundaProcess.failServiceTask("Task_ProcessFile", "FileProcessingError", variables, true);
 
                         log.error("Exception occured: ", exception);
                     })
