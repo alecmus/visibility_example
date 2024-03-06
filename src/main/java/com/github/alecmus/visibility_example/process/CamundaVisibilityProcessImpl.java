@@ -68,7 +68,7 @@ public class CamundaVisibilityProcessImpl implements CamundaVisibilityProcess {
 
             log.debug("Message '" + messageName + "' sent");
         } catch (Exception e) {
-            log.debug("Failed to send message '" + messageName + ": " + e.getMessage());
+            log.debug("Failed to send message '" + messageName + "': " + e.getMessage());
         }
     }
 
