@@ -4,8 +4,9 @@ import java.util.Map;
 
 public interface CamundaProcess {
 
-    Properties startProcess(String processId);
+    Properties startProcess(String processId, String correlationKey);
     void sendMessage(String messageName, String correlationKey);
+    void sendMessage(String messageName, String correlationKey, Map<String, Object> variables);
     void addVariables(Long instanceKey, Map<String, Object> variables);
     void completeServiceTask(String jobType);
     void completeServiceTask(String jobType, Map<String, Object> variables, boolean processVariables);

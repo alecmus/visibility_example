@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Component
 public class CamundaProcessImpl implements CamundaProcess {
@@ -23,27 +21,24 @@ public class CamundaProcessImpl implements CamundaProcess {
         this.zeebeClient = zeebeClient;
     }
 
-
     @Override
-    public Properties startProcess(String processId) {
+    public Properties startProcess(String processId, String correlationKey) {
         log.debug("Starting process: '" + processId + "' ...");
         Properties properties = new Properties();
 
         try {
-            // create Zeebe process instance and add instanceUUID as a process variable
-            // for use as a message correlation key
-            final String instanceUUID = UUID.randomUUID().toString();
-            Map<String, Object> process_variables = Map.of("instanceUUID", instanceUUID);
+            // add correlationKey String as process variable
+            Map<String, Object> process_variables = Map.of("correlationKey", correlationKey);
 
-            long instanceKey = zeebeClient.newCreateInstanceCommand()
-                    .bpmnProcessId(processId)
-                    .latestVersion()
-                    .variables(process_variables)
-                    .send().join()
-                    .getProcessInstanceKey();
+             long instanceKey = zeebeClient.newCreateInstanceCommand()
+                     .bpmnProcessId(processId)
+                     .latestVersion()
+                     .variables(process_variables)
+                     .send().join()
+                     .getProcessInstanceKey();
 
             properties.setInstanceKey(instanceKey);
-            properties.setCorrelationKey(instanceUUID);
+            properties.setCorrelationKey(correlationKey);
 
             log.debug("Process '" + processId + "' started");
         } catch (Exception e) {
@@ -55,6 +50,11 @@ public class CamundaProcessImpl implements CamundaProcess {
 
     @Override
     public void sendMessage(String messageName, String correlationKey) {
+        sendMessage(messageName, correlationKey, Map.of());
+    }
+
+    @Override
+    public void sendMessage(String messageName, String correlationKey, Map<String, Object> variables) {
         try {
             log.debug("Sending message '" + messageName + "' - correlationKey = " + correlationKey);
 
@@ -62,7 +62,9 @@ public class CamundaProcessImpl implements CamundaProcess {
             zeebeClient.newPublishMessageCommand()
                     .messageName(messageName)
                     .correlationKey(correlationKey)
+                    .variables(variables)
                     .timeToLive(Duration.ofSeconds(1))
+                    .requestTimeout(Duration.ofSeconds(1))
                     .send().join();
 
             log.debug("Message '" + messageName + "' sent");
