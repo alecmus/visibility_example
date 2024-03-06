@@ -1,7 +1,6 @@
 package com.github.alecmus.visibility_example.process;
 
 import io.camunda.zeebe.client.ZeebeClient;
-import io.camunda.zeebe.client.api.response.ActivatedJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,77 +82,6 @@ public class CamundaProcessImpl implements CamundaProcess {
                     .send().join();
         } catch (Exception e) {
             log.debug("Failed to add variables to process instance '" + instanceKey + "': " + e.getMessage());
-        }
-    }
-
-    @Override
-    public void completeServiceTask(String jobType) {
-        completeServiceTask(jobType, Map.of(), false);
-    }
-
-    @Override
-    public void completeServiceTask(String jobType, Map<String, Object> variables, boolean processVariables) {
-        try {
-            log.debug("Completing job '" + jobType + "'");
-
-            // activate the job
-            final List<ActivatedJob> activatedJobs = zeebeClient.newActivateJobsCommand()
-                    .jobType(jobType)
-                    .maxJobsToActivate(1)
-                    .requestTimeout(Duration.ofSeconds(1))
-                    .send().join()
-                    .getJobs();
-
-            if (activatedJobs.size() != 1)
-                throw new IllegalStateException("Job not found");
-
-            for (ActivatedJob job : activatedJobs) {
-                if (processVariables)
-                    addVariables(job.getProcessInstanceKey(), variables);
-
-                // complete the job
-                zeebeClient.newCompleteCommand(job)
-                        .variables(processVariables ? Map.of() : variables)
-                        .send().join();
-            }
-        } catch (Exception e) {
-            log.debug("Error completing '" + jobType + "': " + e.getMessage());
-        }
-    }
-
-    public void failServiceTask(String jobType, String errorCode) {
-        failServiceTask(jobType, errorCode, Map.of(), false);
-    }
-
-    @Override
-    public void failServiceTask(String jobType, String errorCode, Map<String, Object> variables, boolean processVariables) {
-        try {
-            log.debug("Failing job '" + jobType + "'");
-
-            // activate the job
-            final List<ActivatedJob> activatedJobs = zeebeClient.newActivateJobsCommand()
-                    .jobType(jobType)
-                    .maxJobsToActivate(1)
-                    .requestTimeout(Duration.ofSeconds(1))
-                    .send().join()
-                    .getJobs();
-
-            if (activatedJobs.size() != 1)
-                throw new IllegalStateException("Job not found");
-
-            for (ActivatedJob job : activatedJobs) {
-                if (processVariables)
-                    addVariables(job.getProcessInstanceKey(), variables);
-
-                // fail the job. This will be handled by an error catch event
-                // identified by the given errorCode.
-                zeebeClient.newThrowErrorCommand(job.getKey())
-                        .errorCode(errorCode)
-                        .variables(processVariables ? Map.of() : variables)
-                        .send().join();
-            }
-        } catch (Exception e) {
-            log.debug("Error failing job '" + jobType + "': " + e.getMessage());
         }
     }
 }

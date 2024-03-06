@@ -8,10 +8,6 @@ public interface CamundaProcess {
     void sendMessage(String messageName, String correlationKey);
     void sendMessage(String messageName, String correlationKey, Map<String, Object> variables);
     void addVariables(Long instanceKey, Map<String, Object> variables);
-    void completeServiceTask(String jobType);
-    void completeServiceTask(String jobType, Map<String, Object> variables, boolean processVariables);
-    void failServiceTask(String jobType, String errorCode);
-    void failServiceTask(String jobType, String errorCode, Map<String, Object> variables, boolean processVariables);
 
     class Properties {
         private Long instanceKey;
