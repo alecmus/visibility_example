@@ -98,6 +98,7 @@ public class CamundaProcessImpl implements CamundaProcess {
             final List<ActivatedJob> activatedJobs = zeebeClient.newActivateJobsCommand()
                     .jobType(jobType)
                     .maxJobsToActivate(1)
+                    .requestTimeout(Duration.ofSeconds(1))
                     .send().join()
                     .getJobs();
 
@@ -131,6 +132,7 @@ public class CamundaProcessImpl implements CamundaProcess {
             final List<ActivatedJob> activatedJobs = zeebeClient.newActivateJobsCommand()
                     .jobType(jobType)
                     .maxJobsToActivate(1)
+                    .requestTimeout(Duration.ofSeconds(1))
                     .send().join()
                     .getJobs();
 
