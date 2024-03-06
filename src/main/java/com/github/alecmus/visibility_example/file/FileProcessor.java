@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
 
 /*
  * File Processor bean that implements the Processor functional interface.
@@ -31,7 +33,8 @@ public class FileProcessor implements Processor {
     @Override
     public void process(Exchange exchange) {
         // start process instance
-        CamundaProcess.Properties properties = camundaProcess.startProcess("Process_VisibilityProcess");
+        CamundaProcess.Properties properties = camundaProcess.startProcess("Process_VisibilityProcess",
+                UUID.randomUUID().toString());
 
         // add correlationKey as exchange header
         exchange.getIn().setHeader("correlationKey", properties.getCorrelationKey());

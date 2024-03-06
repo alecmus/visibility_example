@@ -46,24 +46,27 @@ public class FileRouter extends RouteBuilder {
                 .endDoTry()
                     .process(exchange -> {
                         final String fileName = exchange.getIn().getHeader(Exchange.FILE_NAME, String.class);
+                        final String correlationKey = exchange.getIn().getHeader("correlationKey", String.class);
 
-                        // complete process file service task
-                        camundaProcess.completeServiceTask("Task_ProcessFile");
+                        // send file processed message
+                        camundaProcess.sendMessage("Message_FileProcessed", correlationKey);
 
                         log.info("Done processing: " + fileName);
                     })
                 .doCatch(Exception.class)
                     .process(exchange -> {
                         Exception exception = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+                        final String correlationKey = exchange.getIn().getHeader("correlationKey", String.class);
 
-                        // add exception and cause as process variables
+                        // add exception, cause and errorProcessingFile as process variables
                         Map<String, Object> variables = Map.ofEntries(
                           Map.entry("exception", exception.toString()),
-                          Map.entry("cause", exception.getCause().toString())
+                          Map.entry("cause", exception.getCause().toString()),
+                                Map.entry("errorProcessingFile", Boolean.TRUE)
                         );
 
-                        // fail service task
-                        camundaProcess.failServiceTask("Task_ProcessFile", "FileProcessingError", variables, true);
+                        // send file processed message
+                        camundaProcess.sendMessage("Message_FileProcessed", correlationKey, variables);
 
                         log.error("Exception occured: ", exception);
                     })
