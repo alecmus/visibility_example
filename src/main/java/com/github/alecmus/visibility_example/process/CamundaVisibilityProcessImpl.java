@@ -10,13 +10,13 @@ import java.time.Duration;
 import java.util.Map;
 
 @Component
-public class CamundaProcessImpl implements CamundaProcess {
+public class CamundaVisibilityProcessImpl implements CamundaVisibilityProcess {
 
-    private final Logger log = LoggerFactory.getLogger(CamundaProcessImpl.class);
+    private final Logger log = LoggerFactory.getLogger(CamundaVisibilityProcessImpl.class);
     private final ZeebeClient zeebeClient;
 
     @Autowired
-    public CamundaProcessImpl(ZeebeClient zeebeClient) {
+    public CamundaVisibilityProcessImpl(ZeebeClient zeebeClient) {
         this.zeebeClient = zeebeClient;
     }
 

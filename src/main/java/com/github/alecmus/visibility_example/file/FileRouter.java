@@ -1,6 +1,6 @@
 package com.github.alecmus.visibility_example.file;
 
-import com.github.alecmus.visibility_example.process.CamundaProcess;
+import com.github.alecmus.visibility_example.process.CamundaVisibilityProcess;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
@@ -22,12 +22,12 @@ public class FileRouter extends RouteBuilder {
     private static final String DESTINATION_FOLDER = "C:/software/test/destination-folder";
 
     private final FileProcessor fileProcessor;
-    private final CamundaProcess camundaProcess;
+    private final CamundaVisibilityProcess visibilityProcess;
 
     @Autowired
-    public FileRouter(FileProcessor fileProcessor, CamundaProcess process) {
+    public FileRouter(FileProcessor fileProcessor, CamundaVisibilityProcess visibilityProcess) {
         this.fileProcessor = fileProcessor;
-        this.camundaProcess = process;
+        this.visibilityProcess = visibilityProcess;
     }
 
     /*
@@ -49,7 +49,7 @@ public class FileRouter extends RouteBuilder {
                         final String correlationKey = exchange.getIn().getHeader("correlationKey", String.class);
 
                         // send file processed message
-                        camundaProcess.sendMessage("Message_FileProcessed", correlationKey);
+                        visibilityProcess.sendMessage("Message_FileProcessed", correlationKey);
 
                         log.info("Done processing: " + fileName);
                     })
@@ -66,7 +66,7 @@ public class FileRouter extends RouteBuilder {
                         );
 
                         // send file processed message
-                        camundaProcess.sendMessage("Message_FileProcessed", correlationKey, variables);
+                        visibilityProcess.sendMessage("Message_FileProcessed", correlationKey, variables);
 
                         log.error("Exception occured: ", exception);
                     })
