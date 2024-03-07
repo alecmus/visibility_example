@@ -1,8 +1,6 @@
 package com.github.alecmus.visibility_example.process;
 
 import io.camunda.zeebe.client.ZeebeClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
