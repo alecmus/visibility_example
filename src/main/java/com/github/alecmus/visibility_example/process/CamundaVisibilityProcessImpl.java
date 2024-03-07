@@ -11,7 +11,6 @@ import java.util.Map;
 @Component
 public class CamundaVisibilityProcessImpl implements CamundaVisibilityProcess {
 
-    private final Logger log = LoggerFactory.getLogger(CamundaVisibilityProcessImpl.class);
     private final ZeebeClient zeebeClient;
 
     @Autowired
