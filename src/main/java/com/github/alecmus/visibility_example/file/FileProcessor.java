@@ -31,15 +31,15 @@ public class FileProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) {
-        // start process instance
-        CamundaVisibilityProcess.Properties properties = visibilityProcess.startProcess("Process_VisibilityProcess",
-                UUID.randomUUID().toString());
+        // create correlationKey and add it as an exchange header
+        final String correlationKey = UUID.randomUUID().toString();
+        exchange.getIn().setHeader("correlationKey", correlationKey);
 
-        // add correlationKey as exchange header
-        exchange.getIn().setHeader("correlationKey", properties.getCorrelationKey());
+        // start process instance
+        visibilityProcess.startProcess("Process_VisibilityProcess", correlationKey);
 
         // send file received message
-        visibilityProcess.sendMessage("Message_FileReceived", properties.getCorrelationKey());
+        visibilityProcess.sendMessage("Message_FileReceived", correlationKey);
 
         // get the original file name by reading the header using getHeader()
         String originalFileName = exchange.getIn().getHeader(Exchange.FILE_NAME, String.class);

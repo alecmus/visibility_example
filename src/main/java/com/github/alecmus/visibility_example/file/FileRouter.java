@@ -58,15 +58,12 @@ public class FileRouter extends RouteBuilder {
                         Exception exception = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
                         final String correlationKey = exchange.getIn().getHeader("correlationKey", String.class);
 
-                        // add exception, cause and errorProcessingFile as process variables
-                        Map<String, Object> variables = Map.ofEntries(
-                          Map.entry("exception", exception.toString()),
-                          Map.entry("cause", exception.getCause().toString()),
-                                Map.entry("errorProcessingFile", Boolean.TRUE)
-                        );
-
                         // send file processed message
-                        visibilityProcess.sendMessage("Message_FileProcessed", correlationKey, variables);
+                        // add exception, cause and errorProcessingFile as process variables
+                        visibilityProcess.sendMessage("Message_FileProcessed", correlationKey,
+                                Map.of("exception", exception.toString(),
+                                        "cause", exception.getCause().toString(),
+                                        "errorProcessingFile", Boolean.TRUE));
 
                         log.error("Exception occured: ", exception);
                     })
