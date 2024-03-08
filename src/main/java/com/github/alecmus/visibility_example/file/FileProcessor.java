@@ -38,9 +38,6 @@ public class FileProcessor implements Processor {
         // start process instance
         visibilityProcess.startProcess("Process_VisibilityProcess", correlationKey);
 
-        // send file received message
-        visibilityProcess.sendMessage("Message_FileReceived", correlationKey);
-
         // get the original file name by reading the header using getHeader()
         String originalFileName = exchange.getIn().getHeader(Exchange.FILE_NAME, String.class);
 

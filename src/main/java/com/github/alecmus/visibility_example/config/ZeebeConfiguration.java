@@ -68,7 +68,7 @@ public class ZeebeConfiguration {
     public CommandLineRunner processDeployment(ZeebeClient client) {
         return applicationArguments -> {
 
-            final String processFile = "visibility-process.bpmn";
+            final String processFile = "bpmn/visibility-process.bpmn";
 
             log.info("Deploying process from file " + processFile);
 
