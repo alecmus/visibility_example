@@ -1,6 +1,6 @@
 package com.github.alecmus.visibility_example.file;
 
-import com.github.alecmus.visibility_example.process.CamundaVisibilityProcess;
+import com.github.alecmus.visibility_example.process.ZeebeVisibilityProcess;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
@@ -22,10 +22,10 @@ public class FileRouter extends RouteBuilder {
     private static final String DESTINATION_FOLDER = "C:/software/test/destination-folder";
 
     private final FileProcessor fileProcessor;
-    private final CamundaVisibilityProcess visibilityProcess;
+    private final ZeebeVisibilityProcess visibilityProcess;
 
     @Autowired
-    public FileRouter(FileProcessor fileProcessor, CamundaVisibilityProcess visibilityProcess) {
+    public FileRouter(FileProcessor fileProcessor, ZeebeVisibilityProcess visibilityProcess) {
         this.fileProcessor = fileProcessor;
         this.visibilityProcess = visibilityProcess;
     }

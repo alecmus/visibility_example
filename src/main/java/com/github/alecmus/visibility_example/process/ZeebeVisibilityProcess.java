@@ -2,7 +2,7 @@ package com.github.alecmus.visibility_example.process;
 
 import java.util.Map;
 
-public interface CamundaVisibilityProcess {
+public interface ZeebeVisibilityProcess {
 
     void startProcess(String processId, String correlationKey);
     void sendMessage(String messageName, String correlationKey);

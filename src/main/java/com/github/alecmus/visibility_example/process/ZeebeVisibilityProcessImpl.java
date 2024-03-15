@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class CamundaVisibilityProcessImpl implements CamundaVisibilityProcess {
+public class ZeebeVisibilityProcessImpl implements ZeebeVisibilityProcess {
 
     private final ZeebeClient zeebeClient;
 
     @Autowired
-    public CamundaVisibilityProcessImpl(ZeebeClient zeebeClient) {
+    public ZeebeVisibilityProcessImpl(ZeebeClient zeebeClient) {
         this.zeebeClient = zeebeClient;
     }
 

@@ -1,6 +1,6 @@
 package com.github.alecmus.visibility_example.file;
 
-import com.github.alecmus.visibility_example.process.CamundaVisibilityProcess;
+import com.github.alecmus.visibility_example.process.ZeebeVisibilityProcess;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
@@ -22,10 +22,10 @@ public class FileProcessor implements Processor {
 
     private static final Logger log = LoggerFactory.getLogger(FileProcessor.class);
 
-    private final CamundaVisibilityProcess visibilityProcess;
+    private final ZeebeVisibilityProcess visibilityProcess;
 
     @Autowired
-    public FileProcessor(CamundaVisibilityProcess visibilityProcess) {
+    public FileProcessor(ZeebeVisibilityProcess visibilityProcess) {
         this.visibilityProcess = visibilityProcess;
     }
 
