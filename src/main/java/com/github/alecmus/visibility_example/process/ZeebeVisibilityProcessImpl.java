@@ -2,12 +2,17 @@ package com.github.alecmus.visibility_example.process;
 
 import io.camunda.zeebe.client.ZeebeClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
 public class ZeebeVisibilityProcessImpl implements ZeebeVisibilityProcess {
+
+    @Value("${visibility.enabled:false}")
+    private boolean visibilityEnabled;
 
     private final ZeebeClient zeebeClient;
 
@@ -18,14 +23,24 @@ public class ZeebeVisibilityProcessImpl implements ZeebeVisibilityProcess {
 
     @Override
     public void startProcess(String processId, String correlationKey) {
-        // add correlationKey String as process variable
-        Map<String, Object> process_variables = Map.of("correlationKey", correlationKey);
+        startProcess(processId, correlationKey, Map.of());
+    }
 
-        zeebeClient.newCreateInstanceCommand()
-                .bpmnProcessId(processId)
-                .latestVersion()
-                .variables(process_variables)
-                .send();
+    @Override
+    public void startProcess(String processId, String correlationKey, Map<String, Object> variables) {
+        if (visibilityEnabled) {
+            // add correlationKey String as process variable
+            Map<String, Object> process_variables = new HashMap<>();
+            process_variables.put("correlationKey", correlationKey);
+
+            variables.forEach((key, value) -> process_variables.merge(key, value, (v1, v2) -> v1));
+
+            zeebeClient.newCreateInstanceCommand()
+                    .bpmnProcessId(processId)
+                    .latestVersion()
+                    .variables(process_variables)
+                    .send();
+        }
     }
 
     @Override
@@ -35,11 +50,13 @@ public class ZeebeVisibilityProcessImpl implements ZeebeVisibilityProcess {
 
     @Override
     public void sendMessage(String messageName, String correlationKey, Map<String, Object> variables) {
-        // send message to process
-        zeebeClient.newPublishMessageCommand()
-                .messageName(messageName)
-                .correlationKey(correlationKey)
-                .variables(variables)
-                .send();
+        if (visibilityEnabled) {
+            // send message to process
+            zeebeClient.newPublishMessageCommand()
+                    .messageName(messageName)
+                    .correlationKey(correlationKey)
+                    .variables(variables)
+                    .send();
+        }
     }
 }

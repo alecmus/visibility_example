@@ -22,13 +22,14 @@ public class ZeebeConfig {
     @Bean
     @ConditionalOnMissingBean(ZeebeClient.class)
     public ZeebeClient zeebeClient() {
+
         // create Zeebe client bean
         log.info("Zeebe client bean not found, creating one ...");
 
-        final String zeebeRegion = env.getProperty("zeebe.client.cloud.region");
-        final String zeebeClusterId = env.getProperty("zeebe.client.cloud.clusterId");
-        final String zeebeClientId = env.getProperty("zeebe.client.cloud.clientId");
-        final String zeebeClientSecret = env.getProperty("zeebe.client.cloud.clientSecret");
+        final String zeebeRegion = env.getProperty("zeebe.client.cloud.region", "fakeRegion");
+        final String zeebeClusterId = env.getProperty("zeebe.client.cloud.clusterId", "fakeClusterId");
+        final String zeebeClientId = env.getProperty("zeebe.client.cloud.clientId", "fakeClientId");
+        final String zeebeClientSecret = env.getProperty("zeebe.client.cloud.clientSecret", "fakeClientSecret");
 
         final String zeebeAddress = zeebeClusterId + "." + zeebeRegion + ".zeebe.camunda.io:443";
         final String zeebeAuthorizationServerUrl = "https://login.cloud.camunda.io/oauth/token";
